@@ -38,7 +38,7 @@ fn main() {
 
     // Shell Loop
     loop {
-        print!("{} # ", current_dir());
+        print!("[{}]$ ", current_dir());
         std::io::stdout().flush().unwrap();
 
         let mut line = String::new();
