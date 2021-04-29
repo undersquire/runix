@@ -1,3 +1,5 @@
+use std::io::Write;
+
 pub struct Command {
     pub label: String,
     pub proc: fn(&Vec<&str>) -> Result<(), ()>,

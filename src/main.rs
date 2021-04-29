@@ -1,6 +1,8 @@
 mod command;
 
-use std::io::Write;
+use rustyline::CompletionType;
+use rustyline::Config;
+use rustyline::Editor;
 
 fn execute(args: &mut Vec<&str>, commands: &Vec<command::Command>) -> Result<(), ()> {
     if args.len() > 0 {
@@ -23,26 +25,41 @@ fn execute(args: &mut Vec<&str>, commands: &Vec<command::Command>) -> Result<(),
     }
 }
 
-fn current_dir() -> String {
-    let path = std::env::current_dir()
-        .unwrap()
-        .to_str()
-        .unwrap()
-        .to_owned();
-    path.replace(std::env::home_dir().unwrap().to_str().unwrap(), "~")
-}
-
 fn main() {
+    // Editor
+    let mut reader = Editor::<()>::with_config(
+        Config::builder()
+            .completion_type(CompletionType::List)
+            .build(),
+    );
+
+    let mut history_path = std::env::home_dir().unwrap().to_str().unwrap().to_owned();
+    history_path.push_str("/.runix_history");
+
+    reader.load_history(&history_path).unwrap_or_default();
+
     // Default Commands
     let commands: Vec<command::Command> = command::get_default_commands();
 
     // Shell Loop
     loop {
-        print!("[{}]$ ", current_dir());
-        std::io::stdout().flush().unwrap();
+        let prompt = format!(
+            "[{}]$ ",
+            std::env::current_dir()
+                .unwrap()
+                .to_str()
+                .unwrap()
+                .to_owned()
+                .replace(std::env::home_dir().unwrap().to_str().unwrap(), "~")
+        );
 
-        let mut line = String::new();
-        std::io::stdin().read_line(&mut line).unwrap();
+        let line = match reader.readline(prompt.as_str()) {
+            Ok(data) => {
+                reader.add_history_entry(&data);
+                data
+            }
+            Err(_) => String::from(""),
+        };
 
         let mut args = line.split_ascii_whitespace().collect::<Vec<&str>>();
 
@@ -51,4 +68,6 @@ fn main() {
             Err(_) => break,
         }
     }
+
+    reader.save_history(&history_path).unwrap();
 }

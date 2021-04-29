@@ -5,9 +5,9 @@ A cross-platform UNIX shell.
 Completed features will be marked:
 
 - [X] Command Execution & Shell Commands
-- [ ] Command History
-- [ ] Shell & Bash Scripts
-- [ ] Custom Scripting Language
+- [X] Command History
+- [ ] Command Completion
+- [ ] Scripts
 
 ## Compiling
 To compile runix, make sure you have a Rust toolchain that supports Rust 2018 edition installed.
