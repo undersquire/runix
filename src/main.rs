@@ -2,7 +2,7 @@ mod command;
 
 use std::io::Write;
 
-pub fn execute(args: &mut Vec<&str>, commands: &Vec<command::Command>) -> Result<(), ()> {
+fn execute(args: &mut Vec<&str>, commands: &Vec<command::Command>) -> Result<(), ()> {
     if args.len() > 0 {
         for cmd in commands {
             if String::from(*args.get(0).unwrap()) == cmd.label {
@@ -23,7 +23,7 @@ pub fn execute(args: &mut Vec<&str>, commands: &Vec<command::Command>) -> Result
     }
 }
 
-pub fn current_dir() -> String {
+fn current_dir() -> String {
     let path = std::env::current_dir()
         .unwrap()
         .to_str()
