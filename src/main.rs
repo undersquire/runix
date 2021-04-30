@@ -1,10 +1,22 @@
-mod command;
-
-use rustyline::CompletionType;
-use rustyline::Config;
 use rustyline::Editor;
+use std::env;
+use std::path::Path;
 
-fn execute(args: &mut Vec<&str>, commands: &Vec<command::Command>) -> Result<(), ()> {
+struct Command {
+    label: String,
+    proc: fn(&Vec<&str>) -> Result<(), ()>,
+}
+
+impl Command {
+    fn new(label: &str, proc: fn(&Vec<&str>) -> Result<(), ()>) -> Self {
+        Self {
+            label: label.to_string(),
+            proc,
+        }
+    }
+}
+
+fn execute(args: &mut Vec<&str>, commands: &Vec<Command>) -> Result<(), ()> {
     if args.len() > 0 {
         for cmd in commands {
             if String::from(*args.get(0).unwrap()) == cmd.label {
@@ -27,33 +39,39 @@ fn execute(args: &mut Vec<&str>, commands: &Vec<command::Command>) -> Result<(),
 
 fn main() {
     // Editor
-    let mut reader = Editor::<()>::with_config(
-        Config::builder()
-            .completion_type(CompletionType::List)
-            .build(),
-    );
+    let mut reader = Editor::<()>::new();
 
-    let mut history_path = std::env::home_dir().unwrap().to_str().unwrap().to_owned();
+    let mut history_path = env::home_dir().unwrap().to_str().unwrap().to_owned();
     history_path.push_str("/.runix_history");
 
     reader.load_history(&history_path).unwrap_or_default();
 
     // Default Commands
-    let commands: Vec<command::Command> = command::get_default_commands();
+    let mut commands: Vec<Command> = Vec::new();
+
+    // Exits runix
+    commands.push(Command::new("exit", |_| -> Result<(), ()> {
+        Err(()) // will cause runix to exit
+    }));
+
+    // Change current directory
+    commands.push(Command::new("cd", |args| -> Result<(), ()> {
+        if args.len() > 1 {
+            match env::set_current_dir(Path::new(args.get(1).unwrap())) {
+                Ok(_) => Ok(()),
+                Err(_) => Err(()),
+            }
+        } else {
+            match env::set_current_dir(Path::new(env::home_dir().unwrap().to_str().unwrap())) {
+                Ok(_) => Ok(()),
+                Err(_) => Err(()),
+            }
+        }
+    }));
 
     // Shell Loop
     loop {
-        let prompt = format!(
-            "[{}]$ ",
-            std::env::current_dir()
-                .unwrap()
-                .to_str()
-                .unwrap()
-                .to_owned()
-                .replace(std::env::home_dir().unwrap().to_str().unwrap(), "~")
-        );
-
-        let line = match reader.readline(prompt.as_str()) {
+        let line = match reader.readline("# ") {
             Ok(data) => {
                 reader.add_history_entry(&data);
                 data
