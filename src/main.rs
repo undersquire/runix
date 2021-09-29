@@ -41,7 +41,7 @@ fn main() {
     // Editor
     let mut reader = Editor::<()>::new();
 
-    let mut history_path = env::home_dir().unwrap().to_str().unwrap().to_owned();
+    let mut history_path = dirs::home_dir().unwrap().to_str().unwrap().to_owned();
     history_path.push_str("/.runix_history");
 
     reader.load_history(&history_path).unwrap_or_default();
@@ -62,7 +62,7 @@ fn main() {
                 Err(_) => Err(()),
             }
         } else {
-            match env::set_current_dir(Path::new(env::home_dir().unwrap().to_str().unwrap())) {
+            match env::set_current_dir(Path::new(dirs::home_dir().unwrap().to_str().unwrap())) {
                 Ok(_) => Ok(()),
                 Err(_) => Err(()),
             }
