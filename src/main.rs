@@ -16,7 +16,7 @@ impl Command {
     }
 }
 
-fn execute(args: &Vec<&str>, commands: &Vec<Command>) -> Result<(), ()> {
+fn execute(args: &Vec<&str>, commands: &[Command]) -> Result<(), ()> {
     if args.len() > 0 {
         for cmd in commands {
             if String::from(*args.get(0).unwrap()) == cmd.label {
@@ -48,27 +48,26 @@ fn main() {
     reader.load_history(&history_path).unwrap_or_default();
 
     // Default Commands
-    let mut commands: Vec<Command> = Vec::new();
-
-    // Exits runix
-    commands.push(Command::new("exit", |_| -> Result<(), ()> {
-        Err(()) // will cause runix to exit
-    }));
-
-    // Change current directory
-    commands.push(Command::new("cd", |args| -> Result<(), ()> {
-        if args.len() > 1 {
-            match env::set_current_dir(Path::new(args.get(1).unwrap())) {
-                Ok(_) => Ok(()),
-                Err(_) => Err(()),
+    let commands = [
+        // Exits runix
+        Command::new("exit", |_| -> Result<(), ()> {
+            Err(()) // causes runix to exit
+        }),
+        // Changes directory
+        Command::new("cd", |args| -> Result<(), ()> {
+            if args.len() > 1 {
+                match env::set_current_dir(Path::new(args.get(1).unwrap())) {
+                    Ok(_) => Ok(()),
+                    Err(_) => Err(()),
+                }
+            } else {
+                match env::set_current_dir(Path::new(dirs::home_dir().unwrap().to_str().unwrap())) {
+                    Ok(_) => Ok(()),
+                    Err(_) => Err(()),
+                }
             }
-        } else {
-            match env::set_current_dir(Path::new(dirs::home_dir().unwrap().to_str().unwrap())) {
-                Ok(_) => Ok(()),
-                Err(_) => Err(()),
-            }
-        }
-    }));
+        }),
+    ];
 
     // Shell Loop
     loop {
