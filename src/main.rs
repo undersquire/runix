@@ -16,7 +16,7 @@ impl Command {
     }
 }
 
-fn execute(args: &mut Vec<&str>, commands: &Vec<Command>) -> Result<(), ()> {
+fn execute(args: &Vec<&str>, commands: &Vec<Command>) -> Result<(), ()> {
     if args.len() > 0 {
         for cmd in commands {
             if String::from(*args.get(0).unwrap()) == cmd.label {
@@ -24,9 +24,10 @@ fn execute(args: &mut Vec<&str>, commands: &Vec<Command>) -> Result<(), ()> {
             }
         }
 
-        let cmd = args.remove(0);
-
-        match std::process::Command::new(cmd).args(args).status() {
+        match std::process::Command::new(args[0])
+            .args(&args[1..])
+            .status()
+        {
             Ok(_) => (),
             Err(_) => println!("runix: no such file or directory"),
         }
@@ -79,9 +80,9 @@ fn main() {
             Err(_) => String::from(""),
         };
 
-        let mut args = line.split_ascii_whitespace().collect::<Vec<&str>>();
+        let args = line.split_ascii_whitespace().collect::<Vec<&str>>();
 
-        match execute(&mut args, &commands) {
+        match execute(&args, &commands) {
             Ok(_) => (),
             Err(_) => break,
         }
