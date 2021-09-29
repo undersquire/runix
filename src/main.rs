@@ -4,11 +4,11 @@ use std::path::Path;
 
 struct Command {
     label: String,
-    proc: fn(&Vec<&str>) -> Result<(), ()>,
+    proc: fn(&[&str]) -> Result<(), ()>,
 }
 
 impl Command {
-    fn new(label: &str, proc: fn(&Vec<&str>) -> Result<(), ()>) -> Self {
+    fn new(label: &str, proc: fn(&[&str]) -> Result<(), ()>) -> Self {
         Self {
             label: label.to_string(),
             proc,
@@ -16,10 +16,10 @@ impl Command {
     }
 }
 
-fn execute(args: &Vec<&str>, commands: &[Command]) -> Result<(), ()> {
-    if args.len() > 0 {
+fn execute(args: &[&str], commands: &[Command]) -> Result<(), ()> {
+    if !args.is_empty() {
         for cmd in commands {
-            if String::from(*args.get(0).unwrap()) == cmd.label {
+            if **args.get(0).unwrap() == cmd.label {
                 return (cmd.proc)(args);
             }
         }
