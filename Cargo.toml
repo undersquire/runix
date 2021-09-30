@@ -8,4 +8,4 @@ edition = "2018"
 
 [dependencies]
 dirs = "4.0.0"
-rustyline = "8.0.0"
+rustyline = "9.0.0"
