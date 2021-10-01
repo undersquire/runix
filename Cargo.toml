@@ -9,3 +9,9 @@ edition = "2018"
 [dependencies]
 dirs = "4.0.0"
 rustyline = "9.0.0"
+
+[profile.release]
+lto = true
+opt-level = "s"
+codegen-units = 1
+panic = "abort"
