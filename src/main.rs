@@ -19,7 +19,7 @@ impl Command {
 fn execute(args: &[&str], commands: &[Command]) -> Result<(), ()> {
     if !args.is_empty() {
         for cmd in commands {
-            if **args.get(0).unwrap() == cmd.label {
+            if *args.get(0).unwrap() == cmd.label {
                 return (cmd.proc)(args);
             }
         }
