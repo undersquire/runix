@@ -57,15 +57,17 @@ fn main() {
         Command::new("cd", |args| -> Result<(), ()> {
             if args.len() > 1 {
                 match env::set_current_dir(Path::new(args.get(1).unwrap())) {
-                    Ok(_) => Ok(()),
-                    Err(_) => Err(()),
+                    Ok(_) => {}
+                    Err(_) => println!("cd: no such file or directory"),
                 }
             } else {
                 match env::set_current_dir(Path::new(dirs::home_dir().unwrap().to_str().unwrap())) {
-                    Ok(_) => Ok(()),
-                    Err(_) => Err(()),
+                    Ok(_) => {}
+                    Err(_) => println!("cd: failed to change to home directory"),
                 }
             }
+
+            Ok(())
         }),
     ];
 
