@@ -80,14 +80,14 @@ fn main() {
                     _ => {
                         for entry in reader.history().iter().enumerate() {
                             if arg == entry.1 {
-                                println!("{}  {}", entry.0, entry.1);
+                                println!("{}  {}", entry.0 + 1, entry.1);
                             }
                         }
                     }
                 }
             } else {
                 for entry in reader.history().iter().enumerate() {
-                    println!("{}  {}", entry.0, entry.1);
+                    println!("{}  {}", entry.0 + 1, entry.1);
                 }
             }
 
