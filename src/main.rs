@@ -71,15 +71,15 @@ fn main() {
         }),
         Command::new("history", |reader, args| -> Result<(), ()> {
             if args.len() > 1 {
-                let arg = args.get(1).unwrap();
+                let arg = *args.get(1).unwrap();
 
-                match *arg {
+                match arg {
                     "-c" | "--clear" => {
                         reader.clear_history();
                     }
                     _ => {
                         for entry in reader.history().iter().enumerate() {
-                            if arg == entry.1 {
+                            if arg == *entry.1 {
                                 println!("{}  {}", entry.0 + 1, entry.1);
                             }
                         }
