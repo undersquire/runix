@@ -120,3 +120,31 @@ jobs:
           tag: "runix-unstable"
           overwrite: false
           prerelease: true
+
+  build-macos-arm:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: '1'
+      
+      - name: Install Rust Stable
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: aarch64-apple-darwin
+          default: true
+          override: true
+      
+      - name: Build
+        run: cargo build --release
+      
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: target/release/runix
+          asset_name: runix-macos-aarch64
+          tag: "runix-unstable"
+          overwrite: false
+          prerelease: true
