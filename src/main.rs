@@ -4,11 +4,11 @@ use std::path::Path;
 
 struct Command {
     label: String,
-    proc: fn(&[&str]) -> Result<(), ()>,
+    proc: fn(&mut Editor<()>, &[&str]) -> Result<(), ()>,
 }
 
 impl Command {
-    fn new(label: &str, proc: fn(&[&str]) -> Result<(), ()>) -> Self {
+    fn new(label: &str, proc: fn(&mut Editor<()>, &[&str]) -> Result<(), ()>) -> Self {
         Self {
             label: label.to_string(),
             proc,
@@ -16,11 +16,11 @@ impl Command {
     }
 }
 
-fn execute(args: &[&str], commands: &[Command]) -> Result<(), ()> {
+fn execute(reader: &mut Editor<()>, args: &[&str], commands: &[Command]) -> Result<(), ()> {
     if !args.is_empty() {
         for cmd in commands {
             if *args.get(0).unwrap() == cmd.label {
-                return (cmd.proc)(args);
+                return (cmd.proc)(reader, args);
             }
         }
 
@@ -50,11 +50,11 @@ fn main() {
     // Default Commands
     let commands = [
         // Exits runix
-        Command::new("exit", |_| -> Result<(), ()> {
+        Command::new("exit", |_, _| -> Result<(), ()> {
             Err(()) // causes runix to exit
         }),
         // Changes directory
-        Command::new("cd", |args| -> Result<(), ()> {
+        Command::new("cd", |_, args| -> Result<(), ()> {
             if args.len() > 1 {
                 match env::set_current_dir(Path::new(args.get(1).unwrap())) {
                     Ok(_) => {}
@@ -64,6 +64,30 @@ fn main() {
                 match env::set_current_dir(Path::new(dirs::home_dir().unwrap().to_str().unwrap())) {
                     Ok(_) => {}
                     Err(_) => println!("cd: failed to change to home directory"),
+                }
+            }
+
+            Ok(())
+        }),
+        Command::new("history", |reader, args| -> Result<(), ()> {
+            if args.len() > 1 {
+                let arg = args.get(1).unwrap();
+
+                match *arg {
+                    "-c" | "--clear" => {
+                        reader.clear_history();
+                    }
+                    _ => {
+                        for entry in reader.history().iter().enumerate() {
+                            if arg == entry.1 {
+                                println!("{}  {}", entry.0, entry.1);
+                            }
+                        }
+                    }
+                }
+            } else {
+                for entry in reader.history().iter().enumerate() {
+                    println!("{}  {}", entry.0, entry.1);
                 }
             }
 
@@ -83,7 +107,7 @@ fn main() {
 
         let args = line.split_ascii_whitespace().collect::<Vec<&str>>();
 
-        match execute(&args, &commands) {
+        match execute(&mut reader, &args, &commands) {
             Ok(_) => (),
             Err(_) => break,
         }
